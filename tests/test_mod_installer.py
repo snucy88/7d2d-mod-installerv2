@@ -2,6 +2,7 @@ import unittest
 from mod_manager.mod_installer import install_mod, remove_old_mod
 import os
 import zipfile
+import shutil
 
 class TestModInstaller(unittest.TestCase):
 
@@ -18,7 +19,7 @@ class TestModInstaller(unittest.TestCase):
         if os.path.exists(self.mod_zip_path):
             os.remove(self.mod_zip_path)
         if os.path.exists(self.mods_path):
-            os.rmdir(self.mods_path)
+            shutil.rmtree(self.mods_path)
 
     def test_install_mod(self):
         install_mod(self.mod_zip_path, self.mods_path)

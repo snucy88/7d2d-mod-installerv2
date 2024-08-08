@@ -16,11 +16,16 @@ def find_7d2d_install_path():
 
 def get_steam_install_path():
     try:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Valve\Steam")
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Valve\Steam")
         value, _ = winreg.QueryValueEx(key, "InstallPath")
         return value
     except FileNotFoundError:
-        return None
+        try:
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Valve\Steam")
+            value, _ = winreg.QueryValueEx(key, "InstallPath")
+            return value
+        except FileNotFoundError:
+            return None
 
 def get_steam_library_folders(steam_path):
     library_folders = [steam_path]
