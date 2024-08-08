@@ -22,10 +22,12 @@ def parse_mod_info(mod_info_path):
         tree = ET.parse(mod_info_path)
         root = tree.getroot()
         mod_info = {
-            'name': root.find('name').text if root.find('name') is not None else 'Unknown',
-            'version': root.find('version').text if root.find('version') is not None else 'Unknown',
-            'author': root.find('author').text if root.find('author') is not None else 'Unknown',
-            'description': root.find('description').text if root.find('description') is not None else 'No description'
+            'name': root.find('Name').get('value') if root.find('Name') is not None else 'Unknown',
+            'version': root.find('Version').get('value') if root.find('Version') is not None else 'Unknown',
+            'author': root.find('Author').get('value') if root.find('Author') is not None else 'Unknown',
+            'description': root.find('Description').get('value') if root.find('Description') is not None else 'No description',
+            'update_url': None,
+            'download_url': None
         }
         return mod_info
     except ET.ParseError:
