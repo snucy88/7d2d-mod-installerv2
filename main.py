@@ -18,9 +18,10 @@ def main():
         
         for mod in installed_mods:
             logging.info(f"Checking for updates for mod: {mod['name']}")
-            if check_for_updates(mod):
+            update_available, download_url = check_for_updates(mod)
+            if update_available:
                 logging.info(f"Update available for {mod['name']}, downloading...")
-                mod_file_path = download_mod(mod, download_path)
+                mod_file_path = download_mod(mod, download_path, download_url)
                 if mod_file_path:
                     logging.info(f"Downloaded {mod['name']}, installing...")
                     remove_old_mod(mod['name'], mods_path)

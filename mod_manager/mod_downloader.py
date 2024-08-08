@@ -2,21 +2,30 @@ import os
 import requests
 import xml.etree.ElementTree as ET
 
+GITHUB_API_URL = "https://api.github.com"
+
 def check_for_updates(mod):
     try:
-        update_url = mod.get('update_url')
-        response = requests.get(update_url)
+        search_url = f"{GITHUB_API_URL}/search/repositories?q={mod['name']}"
+        response = requests.get(search_url)
         if response.status_code == 200:
-            latest_version = response.json().get('version')
-            return latest_version > mod['version']
-        return False
+            items = response.json().get('items')
+            if items:
+                repo = items[0]  # Nehme das erste gefundene Repository
+                latest_release_url = f"{GITHUB_API_URL}/repos/{repo['full_name']}/releases/latest"
+                release_response = requests.get(latest_release_url)
+                if release_response.status_code == 200:
+                    latest_version = release_response.json().get('tag_name')
+                    assets = release_response.json().get('assets', [])
+                    download_url = assets[0]['browser_download_url'] if assets else None
+                    return latest_version > mod['version'], download_url
+        return False, None
     except Exception as e:
         print(f"Failed to check for updates for mod {mod['name']}: {e}")
-        return False
+        return False, None
 
-def download_mod(mod, download_path):
+def download_mod(mod, download_path, download_url):
     try:
-        download_url = mod.get('download_url')
         response = requests.get(download_url)
         if response.status_code == 200:
             mod_file_path = os.path.join(download_path, f"{mod['name']}.zip")
@@ -33,12 +42,10 @@ def parse_mod_info(mod_info_path):
         tree = ET.parse(mod_info_path)
         root = tree.getroot()
         mod_info = {
-            'name': root.find('name').text if root.find('name') is not None else 'Unknown',
-            'version': root.find('version').text if root.find('version') is not None else 'Unknown',
-            'author': root.find('author').text if root.find('author') is not None else 'Unknown',
-            'description': root.find('description').text if root.find('description') is not None else 'No description',
-            'update_url': root.find('update_url').text if root.find('update_url') is not None else '',
-            'download_url': root.find('download_url').text if root.find('download_url') is not None else ''
+            'name': root.find('Name').get('value') if root.find('Name') is not None else 'Unknown',
+            'version': root.find('Version').get('value') if root.find('Version') is not None else 'Unknown',
+            'author': root.find('Author').get('value') if root.find('Author') is not None else 'Unknown',
+            'description': root.find('Description').get('value') if root.find('Description') is not None else 'No description'
         }
         return mod_info
     except ET.ParseError:
