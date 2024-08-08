@@ -1,21 +1,35 @@
 import unittest
 from mod_manager.mod_installer import install_mod, remove_old_mod
 import os
+import zipfile
 
 class TestModInstaller(unittest.TestCase):
 
+    def setUp(self):
+        self.mod_zip_path = "dummy_mod.zip"
+        self.mods_path = "mods_directory"
+        os.makedirs(self.mods_path, exist_ok=True)
+
+        # Erstelle eine echte Dummy-Zip-Datei
+        with zipfile.ZipFile(self.mod_zip_path, 'w') as zipf:
+            zipf.writestr('mod_name/', '')
+
+    def tearDown(self):
+        if os.path.exists(self.mod_zip_path):
+            os.remove(self.mod_zip_path)
+        if os.path.exists(self.mods_path):
+            os.rmdir(self.mods_path)
+
     def test_install_mod(self):
-        # Du kannst einen Dummy-Mod zum Testen verwenden
-        mod_zip_path = "path_to_mod_zip"  # Passe diesen Pfad an
-        mods_path = "path_to_mods_directory"  # Passe diesen Pfad an
-        install_mod(mod_zip_path, mods_path)
-        self.assertTrue(os.path.exists(os.path.join(mods_path, "mod_name")))  # Passe diesen Pfad an
+        install_mod(self.mod_zip_path, self.mods_path)
+        self.assertTrue(os.path.exists(os.path.join(self.mods_path, 'mod_name')))
 
     def test_remove_old_mod(self):
         mod_name = "example_mod"
-        mods_path = "path_to_mods_directory"  # Passe diesen Pfad an
-        remove_old_mod(mod_name, mods_path)
-        self.assertFalse(os.path.exists(os.path.join(mods_path, mod_name)))
+        mod_path = os.path.join(self.mods_path, mod_name)
+        os.makedirs(mod_path, exist_ok=True)
+        remove_old_mod(mod_name, self.mods_path)
+        self.assertFalse(os.path.exists(mod_path))
 
 if __name__ == "__main__":
     unittest.main()
